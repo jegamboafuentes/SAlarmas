@@ -1,0 +1,68 @@
+NOMBRE DEL PROYECTO:     Alarmas de caja
+ ALIAS DEL PROYECTO:    
+  FECHA DE CREACIÓN:    
+           VETERANO:    
+      COLOBORADORES:     1233388, 
+
+DESCRIPCIÓN:    
+    Web service RESTFULL y SOAP, para alertar eventos de sucursal
+se envían notificaciones vía mail,
+                        
+
+
+MÓDULOS:    
+
+================================================================================
+  Nombre: Malas prácticas en operación (PRODUCCIÓN)
+   Alias: malaPract
+Detalles: Registra en base de datos los registros de malas prácticas en operación.
+
+
+====================================
+
+================================================================================
+  Nombre: Depósitos fictos (DESARROLLO)
+   Alias: depFicto
+Detalles: 
+
+
+
+
+====================================
+
+================================================================================
+  Nombre: Alarma de empleados operando sólos (DEPRECADO)
+   Alias: alarmasucursal
+Detalles: 
+
+====================================
+
+================================================================================
+  NOMBRE: Empleados operanso sólos en tienda.
+   ALIAS: empOpSolo
+DETALLES: Web service para registrar en base de datos, los eventos cuando un empleado 
+          se queda operando sólo, y cuando hay por lo menos otro empleado.
+
+
+ SP PAQUETE: PQCJALR0002
+SP S PROCED: PACJALR0001
+
+
+-- Regresa los datos de bloqueos y anexa la fecha de desbloqueo
+SELECT B.*,TO_CHAR(B.FDFECHAID,'YYYY-MM-DD HH24:MI:SS') BLOQ,
+(
+  SELECT TO_CHAR(MIN(D.FDFECHAID),'YYYY-MM-DD HH24:MI:SS') FROM TACJALREMPSOLO D 
+  WHERE D.FIPAISID=B.FIPAISID AND D.FICANALID=B.FICANALID 
+  AND D.FISUCURSALID=B.FISUCURSALID AND D.FDFECHAID >= B.FDFECHAID AND D.FISTATUSBLOQ = 1
+) DESBLOQ
+FROM TACJALREMPSOLO B
+WHERE TRUNC(B.FDFECHAID) =  TO_DATE('2014-12-17','YYYY-MM-DD') AND B.FISTATUSBLOQ = 0
+
+====================================
+
+================================================================================
+  Nombre: 
+   Alias:
+Detalles: 
+
+====================================

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:ws="http://jax-ws.dev.java.net/spring/core"
+       xmlns:wss="http://jax-ws.dev.java.net/spring/servlet"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://jax-ws.dev.java.net/spring/core http://jax-ws.dev.java.net/spring/core.xsd
+        http://jax-ws.dev.java.net/spring/servlet http://jax-ws.dev.java.net/spring/servlet.xsd">
+
+    <context:component-scan base-package="com.baz.scc"/>
+    
+    <context:property-placeholder location="classpath:application.properties, classpath:connection.properties" system-properties-mode="OVERRIDE" ignore-unresolvable="true"  />
+  
+<!--    <bean id="usrcajaDataSource" class="oracle.ucp.jdbc.PoolDataSourceFactory" factory-method="getPoolDataSource">
+        <property name="URL" value="#{${application.produccion} ? '${prod.oracle.url}' : '${des.oracle.url}'}"/>
+        <property name="user" value="#{${application.produccion} ? '${prod.oracle.username}' : '${des.oracle.username}'}" />
+        <property name="password" value="#{${application.produccion} ? '${prod.oracle.password}' : '${des.oracle.password}'}" />
+        <property name="connectionFactoryClassName" value="oracle.jdbc.pool.OracleDataSource"/>
+        <property name="minPoolSize" value="2"/>
+        <property name="maxPoolSize" value="10"/>
+         <property name="initialPoolSize" value="5"/>
+        <property name="inactiveConnectionTimeout" value="120"/>
+        <property name="validateConnectionOnBorrow" value="true"/>
+        <property name="maxStatements" value="10"/>
+        <property name="sQLForValidateConnection" value="SELECT 1 FROM DUAL"/>
+    </bean>-->
+    
+    <bean id="usrcajaDataSource" class="oracle.jdbc.pool.OracleDataSource" destroy-method="close">
+        <property name="uRL" value="#{${application.produccion} ? '${prod.oracle.url}' : '${des.oracle.url}'}"/>
+        <property name="user" value="#{${application.produccion} ? '${prod.oracle.username}' : '${des.oracle.username}'}"/>
+        <property name="password" value="#{${application.produccion} ? '${prod.oracle.password}' : '${des.oracle.password}'}"/>
+        <property name="maxStatements" value="10"/>
+        <property name="connectionCacheProperties">
+        <props merge="default">
+            <prop key="MinLimit">2</prop>
+            <prop key="MaxLimit">10</prop>
+        </props>
+        </property>
+    </bean>
+    
+    <!-- Temporal -->
+    <bean id="usrinfcajaDataSource" class="oracle.jdbc.pool.OracleDataSource" destroy-method="close">
+        <property name="uRL" value="#{${application.produccion} ? '${prod.oracle.url}' : '${des.oracle.url}'}"/>
+        <property name="user" value="#{${application.produccion} ? '${prod.oracle.inf.username}' : '${des.oracle.inf.username}'}"/>
+        <property name="password" value="#{${application.produccion} ? '${prod.oracle.inf.password}' : '${des.oracle.inf.password}'}"/>
+        <property name="maxStatements" value="10"/>
+        <property name="connectionCacheProperties">
+        <props merge="default">
+            <prop key="MinLimit">2</prop>
+            <prop key="MaxLimit">10</prop>
+        </props>
+        </property>
+    </bean>
+    
+    <!-- JDBC Templates -->
+   
+    <bean id="usrcajaJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg ref="usrcajaDataSource" />
+    </bean>
+    
+    <!-- Temporal -->
+    <bean id="usrinfcajaJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <constructor-arg ref="usrinfcajaDataSource" />
+    </bean>
+    
+    <bean id="daoConfig" class="com.baz.scc.commons.support.CjCRDaoConfig">
+        <property name="objectUser" value="#{${application.produccion} ? '${prod.oracle.object.user}' : '${des.oracle.object.user}'}"/>
+    </bean>
+       
+    <alias name="usrcajaJdbcTemplate" alias="plantillaJdbcTemplate" />  
+    <alias name="usrcajaJdbcTemplate" alias="as400JdbcTemplate" />  
+  
+    <!-- Configuracion de la aplicacion -->    
+    <bean id ="apConfig" class= "com.baz.scc.alarmas.support.CjCRAppConfig">
+        <property name="asuntoUnEmpleado" value="${monitoreo.alarma.asuntoEmpleado}"/>     
+        <property name="asuntoMalasPract" value="${monitoreo.alarma.asuntoMalasPract}"/>
+        <property name="produccion" value="${application.produccion}"/>              
+    </bean>    
+   
+    <!-- URL para servicio SOAP -->
+    <wss:binding url="/services/soap/alarma">
+        <wss:service>
+            <ws:service bean="#alarmaService" />
+        </wss:service>
+    </wss:binding>
+    
+    <!-- URL para servicio SOAP Depositos Fictos-->
+    <!-- b233388 SINCE V1.1.2-->
+    <wss:binding url="/services/soap/depositosFictos/bloqueos">
+        <wss:service>
+            <ws:service bean="#depositoFictoService" />
+        </wss:service>
+    </wss:binding>
+    
+    
+    <wss:binding url="/services/soap/malasPracticas">
+        <wss:service>
+            <ws:service bean="#malasPracticasSoap" />
+        </wss:service>
+    </wss:binding>
+    
+    
+    <wss:binding url="/services/soap/empleadoOperandoSolo">
+        <wss:service>
+            <ws:service bean="#empOpSoloSoap" />
+        </wss:service>
+    </wss:binding>
+    
+
+</beans>
